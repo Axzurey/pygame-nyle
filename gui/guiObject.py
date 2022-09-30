@@ -90,12 +90,12 @@ class guiObject(instance):
 
         #background
 
-        (bgPosition, bgSize) = self.getSizeAndPositionFromUdim2(self.position, self.size)
+        (position, size) = self.getSizeAndPositionFromUdim2(self.position, self.size)
 
-        self.absolutePosition = bgPosition
-        self.absoluteSize = bgSize
+        self.absolutePosition = position
+        self.absoluteSize = size
 
-        backgroundRect = pygame.Rect(bgPosition.x, bgPosition.y, bgSize.x, bgSize.y)
+        backgroundRect = pygame.Rect(position.x, position.y, size.x, size.y)
 
         backSurf = pygame.Surface(backgroundRect.size)
 
@@ -105,7 +105,7 @@ class guiObject(instance):
 
         #border
 
-        borderRect = pygame.Rect(bgPosition.x - self.borderWidth, bgPosition.y - self.borderWidth, bgSize.x + self.borderWidth, bgSize.y + self.borderWidth)
+        borderRect = pygame.Rect(position.x - self.borderWidth, position.y - self.borderWidth, size.x + self.borderWidth * 2, size.y + self.borderWidth * 2)
 
         borderSurf = pygame.Surface(borderRect.size, pygame.SRCALPHA)
 
@@ -113,21 +113,23 @@ class guiObject(instance):
 
         dropOffset = self.udim2RelativeToSelfSize(self.dropShadowOffset, 'xx')
 
-        dropPos = Vector2(bgPosition.x + dropOffset.x,
-            bgPosition.y + dropOffset.y)
+        dropPos = Vector2(position.x + dropOffset.x,
+            position.y + dropOffset.y)
 
-        dropSize = Vector2(bgSize.x + self.dropShadowRadius,
-            bgSize.y + self.dropShadowRadius)
+        dropSize = Vector2(size.x + self.dropShadowRadius,
+            size.y + self.dropShadowRadius)
 
         dropNeonRect = pygame.Rect(dropPos, dropSize)
 
-        dropShadowSurface = pygame.Surface(dropNeonRect.size, pygame.SRCALPHA)  
+        scrSize = screen.get_size()
 
-        pygame.draw.rect(dropShadowSurface, self.dropShadowColor.toRGBTuple(), dropNeonRect)
+        dropShadowSurface = pygame.Surface((scrSize[1], scrSize[0]), pygame.SRCALPHA)
+
+        pygame.draw.rect(dropShadowSurface, self.dropShadowColor.toRGBTuple(), (dropNeonRect.y, dropNeonRect.x, dropNeonRect.h, dropNeonRect.w))
 
         dropNeonSurface = create_neon(dropShadowSurface)
 
-        screen.blit(dropNeonSurface, (100, 100), special_flags = pygame.BLEND_PREMULTIPLIED)
+        screen.blit(dropNeonSurface, (0, 0), special_flags = pygame.BLEND_PREMULTIPLIED)
 
         screen.blit(borderSurf, borderRect)
 

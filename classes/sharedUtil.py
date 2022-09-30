@@ -2,7 +2,7 @@ import threading
 import pygame
 import cv2
 import numpy
-from typing import Any
+from typing import Any, Union
 
 
 def clamp(x: float, minV: float, maxV: float):
@@ -22,7 +22,7 @@ def createThread(func: Any):
 
     return thr
 
-def create_neon(surf: pygame.Surface):
+def create_neon(surf: Union[pygame.Surface, pygame.surface.Surface]):
     surf_alpha = surf.convert_alpha()
     rgb = pygame.surfarray.array3d(surf_alpha) # type: ignore
     alpha = pygame.surfarray.array_alpha(surf_alpha).reshape((*rgb.shape[:2], 1)) # type: ignore
@@ -32,8 +32,6 @@ def create_neon(surf: pygame.Surface):
     
     bloom_surf = pygame.image.frombuffer(image.flatten(), image.shape[1::-1], 'RGBA') # type: ignore
 
-    bloom_surf = pygame.transform.rotate(bloom_surf, 90)
-
-    ISSUE: ONLY BLURS HALF THE IMAGE?
+    #bloom_surf = pygame.transform.rotate(bloom_surf, 90)
     
     return bloom_surf

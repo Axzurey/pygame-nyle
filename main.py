@@ -1,4 +1,5 @@
 from classes.color4 import color4
+from classes.udim2 import udim2
 #from classes.udim2 import udim2
 from client.renderer import renderer, gameLoop
 import pygame
@@ -22,6 +23,8 @@ gameLoop.setRenderer(mainRenderer)
 #mainRenderer.setParent(frame, mainRenderer)
 
 textl = textlabel()
+
+textl.position = udim2.fromScale(.6, .3)
 
 mainRenderer.setParent(textl, mainRenderer)
 

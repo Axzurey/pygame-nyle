@@ -85,7 +85,7 @@ class renderer:
         parameter [fontPath] should be the absolute path to the font file
         """
         try:
-            if os.path.isfile(fontPath) and os.path.basename(fontPath.split('.')[1]) == 'ttf':
+            if os.path.isfile(fontPath) and fontPath.split('.')[len(fontPath.split('.')) - 1] == 'ttf':
                 font = pygame.font.Font(fontPath, defaultFontSize)
 
                 self.fonts[fontAlias.lower()] = font

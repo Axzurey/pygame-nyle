@@ -21,11 +21,13 @@ GUI_DEFAULT_PROPERTIES = {
     "borderWidth": lambda: 5,
     "dropShadowColor": lambda: color4(.2, .2, .2),
     "dropShadowRadius": lambda: 5,
-    "dropShadowOffset": lambda: udim2.fromOffset(5, 5),
+    "dropShadowOffset": lambda: udim2.fromOffset(2, 2),
     "text": lambda: 'Hello World!',
     "textColor": lambda: color4(.5, .5, .5),
     "textSize": lambda: 5,
-    "textFont": lambda: "notosansmono-regular"
+    "textFont": lambda: "notosansmono-regular",
+    "textAlignX": lambda: "left",
+    "textAlignY": lambda: "top"
 }
 
 GUI_PROPERTY_MAP: dict[str, Dict[Literal['properties'], list[str]]] = {
@@ -41,7 +43,7 @@ GUI_PROPERTY_MAP: dict[str, Dict[Literal['properties'], list[str]]] = {
         ],
     },
     "textLabel": {
-        "properties": ["text", "textColor", "textSize", "textFont"],
+        "properties": ["text", "textColor", "textSize", "textFont", "left", "top"],
     }
 }
 
