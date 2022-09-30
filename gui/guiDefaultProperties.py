@@ -1,6 +1,7 @@
-from typing import Any, Dict, Literal, Union
+from typing import Any, Dict, Literal
 import pygame
 from classes.color4 import color4
+from classes.sharedUtil import rawSet
 from classes.udim2 import udim2
 from gui.instance import instance
 
@@ -22,15 +23,14 @@ GUI_DEFAULT_PROPERTIES = {
     "dropShadowRadius": lambda: 5,
     "dropShadowOffset": lambda: udim2.fromOffset(5, 5),
     "text": lambda: 'Hello World!',
-    "textColor": lambda: color4(1, 1, 1),
+    "textColor": lambda: color4(.5, .5, .5),
     "textSize": lambda: 5,
-    "textFont": lambda: "NotoSansMono"
+    "textFont": lambda: "notosansmono-regular"
 }
 
-GUI_PROPERTY_MAP: dict[str, Dict[Union[Literal['properties'], Literal["inherits"]], list[str]]] = {
+GUI_PROPERTY_MAP: dict[str, Dict[Literal['properties'], list[str]]] = {
     "instance": {
         "properties": ["children"],
-        "inherits": []
     },
     "guiObject": {
         "properties": [
@@ -39,24 +39,19 @@ GUI_PROPERTY_MAP: dict[str, Dict[Union[Literal['properties'], Literal["inherits"
             "dropShadowRadius", "dropShadowOffset", "absolutePosition",
             "absoluteSize"
         ],
-        "inherits": ["instance"],
     },
-    "textObject": {
+    "textLabel": {
         "properties": ["text", "textColor", "textSize", "textFont"],
-        "inherits": ["guiObject"]
     }
 }
 
 def LoadDefaultGuiProperties(guiType: str, guiObject: instance):
+    print('init for', guiType)
     if GUI_PROPERTY_MAP[guiType]:
-        #load inherited properties
-        for inh in GUI_PROPERTY_MAP[guiType]["inherits"]:
-            LoadDefaultGuiProperties(inh, guiObject)
-
         #load own properties
         for propKey in GUI_PROPERTY_MAP[guiType]["properties"]:
             if propKey in GUI_DEFAULT_PROPERTIES:
-                guiObject[propKey] = GUI_DEFAULT_PROPERTIES[propKey]()
+                rawSet(guiObject, propKey, GUI_DEFAULT_PROPERTIES[propKey]())
             else:
                 raise Exception(f"property {propKey} is not a valid property in the Default Properties map!")
 

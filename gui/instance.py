@@ -10,7 +10,7 @@ class instance:
         self.__setattr__(key, value);
 
     def __getitem__(self, key: str):
-        return self.__getattribute__(key);
+        return self.__getattribute__(key) or super().__getattribute__(key);
 
     def __setattr__(self, prop: str, value: Any) -> None:
         if (prop == 'parent'):

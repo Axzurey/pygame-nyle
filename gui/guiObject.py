@@ -29,7 +29,8 @@ class guiObject(instance):
     dropShadowOffset: udim2
 
     def __init__(self):
-        super()
+
+        super().__init__()
 
         self.__internal = {
             
@@ -91,6 +92,9 @@ class guiObject(instance):
 
         (bgPosition, bgSize) = self.getSizeAndPositionFromUdim2(self.position, self.size)
 
+        self.absolutePosition = bgPosition
+        self.absoluteSize = bgSize
+
         backgroundRect = pygame.Rect(bgPosition.x, bgPosition.y, bgSize.x, bgSize.y)
 
         backSurf = pygame.Surface(backgroundRect.size)
@@ -107,32 +111,27 @@ class guiObject(instance):
 
         borderSurf.fill(self.borderColor.toRGBATuple())
 
-        dropShadowSurface = pygame.Surface(Vector2(1920, 1080), pygame.SRCALPHA)
-
         dropOffset = self.udim2RelativeToSelfSize(self.dropShadowOffset, 'xx')
 
-        dropPos = Vector2(bgPosition.x - self.dropShadowRadius + dropOffset.x,
-            bgPosition.y - self.dropShadowRadius + dropOffset.y)
+        dropPos = Vector2(bgPosition.x + dropOffset.x,
+            bgPosition.y + dropOffset.y)
 
         dropSize = Vector2(bgSize.x + self.dropShadowRadius,
             bgSize.y + self.dropShadowRadius)
 
         dropNeonRect = pygame.Rect(dropPos, dropSize)
 
-        pygame.draw.rect(dropShadowSurface, self.dropShadowColor.toRGBTuple(), (
-            dropNeonRect.y + int(dropNeonRect.size[1] / 2),
-            dropNeonRect.x + int(dropNeonRect.size[0] / 2),
-            dropNeonRect.size[1],
-            dropNeonRect.size[0]
-        ))
+        dropShadowSurface = pygame.Surface(dropNeonRect.size, pygame.SRCALPHA)  
+
+        pygame.draw.rect(dropShadowSurface, self.dropShadowColor.toRGBTuple(), dropNeonRect)
 
         dropNeonSurface = create_neon(dropShadowSurface)
 
-        screen.blit(dropNeonSurface, (0, 0), special_flags = pygame.BLEND_PREMULTIPLIED)
+        screen.blit(dropNeonSurface, (100, 100), special_flags = pygame.BLEND_PREMULTIPLIED)
 
-        screen.blit(borderSurf, borderRect.center)
+        screen.blit(borderSurf, borderRect)
 
-        screen.blit(backSurf, backgroundRect.center)
+        screen.blit(backSurf, backgroundRect)
 
         for child in self.children:
             child.update(dt)

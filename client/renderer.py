@@ -92,13 +92,13 @@ class renderer:
             else:
                 print(f'[nyle]: Unable to load font "{fontAlias.lower()}" from path {fontPath} as it is not .ttf file')
         except Exception:
-            print(f'[nyle]: Unable to load font "{fontAlias.lower()}" from path {fontPath}')
+            print(f'[nyle]: (Unexpected) Unable to load font "{fontAlias.lower()}" from path {fontPath}')
     
     def loadDefaultFonts(self):
-        searchDir = os.path.join(str(pathlib.Path(__file__).parent.resolve()), '../fonts/')
+        searchDir = os.path.join(str(pathlib.Path(__file__).parent.parent.resolve()), 'fonts')
         if os.path.isdir(searchDir):
             for p in os.listdir(searchDir):
-                self.loadFont(os.path.basename(p.split('.')[0]), searchDir + p)
+                self.loadFont(os.path.basename(p.split('.')[0]), os.path.join(searchDir, p))
         else:
             print(f'[nyle]: Unable to load default fonts from {searchDir} as it is not a folder')
 
