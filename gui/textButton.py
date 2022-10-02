@@ -1,12 +1,14 @@
 from gui.guiDefaultProperties import LoadDefaultGuiProperties
 from gui.textObject import textObject
 
-class textLabel(textObject):
+class textButton(textObject):
+
+    enabled: bool
     
     def __init__(self):
         super().__init__()
 
-        LoadDefaultGuiProperties('textLabel', self)
+        LoadDefaultGuiProperties('textButton', self)
 
     def update(self, dt: float):
         super().update(dt)

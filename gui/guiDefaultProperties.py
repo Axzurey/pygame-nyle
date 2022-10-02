@@ -1,4 +1,5 @@
-from typing import Any, Dict, Literal
+from __future__ import annotations
+from typing import Any, Dict, Literal, Union
 import pygame
 from classes.color4 import color4
 from classes.sharedUtil import rawSet
@@ -6,7 +7,7 @@ from classes.udim2 import udim2
 from gui.instance import instance
 
 def blankAnyTypedList() -> list[Any]:
-    return []
+    return list()
 
 GUI_DEFAULT_PROPERTIES = {
     "parent": lambda: None,
@@ -17,20 +18,22 @@ GUI_DEFAULT_PROPERTIES = {
     "position": lambda: udim2.fromOffset(0, 0),
     "backgroundColor": lambda: color4(.8, .8, 0),
     "borderColor": lambda: color4(1, 0, 1),
-    "borderRadius": lambda: udim2.fromOffset(15, 15),
+    "cornerRadius": lambda: 15,
     "borderWidth": lambda: 5,
     "dropShadowColor": lambda: color4(.2, .2, .2),
     "dropShadowRadius": lambda: 5,
     "dropShadowOffset": lambda: udim2.fromOffset(2, 2),
     "text": lambda: 'Hello World!',
     "textColor": lambda: color4(.5, .5, .5),
-    "textSize": lambda: 5,
+    "textSize": lambda: 16,
     "textFont": lambda: "notosansmono-regular",
     "textAlignX": lambda: "left",
-    "textAlignY": lambda: "top"
+    "textAlignY": lambda: "top",
+    "enabled": lambda: True,
+    "zindex": lambda: 1
 }
 
-GUI_PROPERTY_MAP: dict[str, Dict[Literal['properties'], list[str]]] = {
+GUI_PROPERTY_MAP: dict[str, Dict[Union[Literal['properties'], Literal["inherits"]], list[str]]] = {
     "instance": {
         "properties": ["children"],
     },
@@ -39,11 +42,21 @@ GUI_PROPERTY_MAP: dict[str, Dict[Literal['properties'], list[str]]] = {
             "size", "position", "backgroundColor",
             "borderColor", "borderWidth", "dropShadowColor", 
             "dropShadowRadius", "dropShadowOffset", "absolutePosition",
-            "absoluteSize"
+            "absoluteSize", "cornerRadius", "zindex"
         ],
+        "inherits": ["instance"]
+    },
+    "textObject": {
+        "properties": ["text", "textColor", "textSize", "textFont", "textAlignX", "textAlignY"],
+        "inherits": ["guiObject"]
     },
     "textLabel": {
-        "properties": ["text", "textColor", "textSize", "textFont", "left", "top"],
+        "properties": [],
+        "inherits": ["textObject"]
+    },
+    "textButton": {
+        "properties": ["enabled"],
+        "inherits": ["textObject"]
     }
 }
 

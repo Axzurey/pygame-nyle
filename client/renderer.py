@@ -3,16 +3,24 @@ from __future__ import annotations
 import os
 import pathlib
 import time
-from typing import Dict, Union
+from typing import Dict, Optional, Tuple, Union
 import pygame
-from pygame import freetype
+import pygame.freetype
 from classes.color4 import color4
 from classes.sharedUtil import rawSet
-
 from gui.instance import instance
 
 pygame.init()
-freetype.init()
+pygame.freetype.init()
+
+freeColorTuple = Tuple[int, int, int, Optional[int]]
+
+class freeFont:
+
+    def render(
+        self, text: str, fgcolor: freeColorTuple = (255, 255, 255, 255), bgColor: freeColorTuple = (0, 0, 0, 0),
+        rotation: int = 0, size: int = 16
+    ) -> Tuple[pygame.Surface, pygame.Rect]: ...
 
 class renderer:
     rendererClosing: bool
@@ -21,7 +29,7 @@ class renderer:
 
     children: list[instance]
 
-    fonts: Dict[str, pygame.font.Font]
+    fonts: Dict[str, freeFont]
 
     def __init__(self, resolution: pygame.Vector2, framerate: int, backgroundColor: color4):
         self.rendererClosing = False;
@@ -43,14 +51,37 @@ class renderer:
 
     @staticmethod
     def setParent(inst: instance, to: Union[renderer, instance, None]):
+        print(inst, to)
         if to:
             if inst in to.children: return;
             rawSet(inst, 'parent', to);
             to.children.append(inst);
+            print(id(to.children), id(inst.children))
         else:
             if inst.parent:
                 inst.parent.children.remove(inst);
                 rawSet(inst, 'parent', None);
+
+    def recurseUpdate(self, inst: instance, dt: float):
+        inst.update(dt)
+
+        childrenPriority: list[instance] = []
+        childrenLast: list[instance] = []
+
+        for child in inst.children:
+            if type(child["zindex"]) is int:
+                childrenPriority.append(child)
+            else:
+                childrenLast.append(child)
+
+        childrenPriority.sort(key=lambda x: x["zindex"])
+
+        print(inst, len(childrenPriority), len(childrenLast), inst.children)
+
+        for child in childrenPriority: self.recurseUpdate(child, dt)
+
+        for child in childrenLast: self.recurseUpdate(child, dt)
+
 
     def start(self):
         clock = pygame.time.Clock()
@@ -73,7 +104,7 @@ class renderer:
             self.screen.fill(self.backgroundColor.toRGBTuple())
 
             for child in self.children:
-                child.update(dt)
+                self.recurseUpdate(child, dt)
 
             pygame.display.flip()
 
@@ -86,7 +117,7 @@ class renderer:
         """
         try:
             if os.path.isfile(fontPath) and fontPath.split('.')[len(fontPath.split('.')) - 1] == 'ttf':
-                font = pygame.font.Font(fontPath, defaultFontSize)
+                font: freeFont = pygame.freetype.Font(fontPath, defaultFontSize) #type: ignore
 
                 self.fonts[fontAlias.lower()] = font
             else:

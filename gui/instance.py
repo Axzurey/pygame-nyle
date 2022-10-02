@@ -4,7 +4,10 @@ import client.renderer as cliRen
 
 class instance:
     parent: Union[instance, cliRen.renderer]
-    children: list[instance] = []
+    children: list[instance]
+
+    def __init__(self):
+        LoadDefaultGuiProperties('instance', self)
 
     def __setitem__(self, key: str, value: Any):
         self.__setattr__(key, value);
@@ -21,5 +24,6 @@ class instance:
     def __getattribute__(self, prop: str):
         return super().__getattribute__(prop);
 
-    def update(self, dt: float):
-        pass
+    def update(self, dt: float): ...
+
+from gui.guiDefaultProperties import LoadDefaultGuiProperties
