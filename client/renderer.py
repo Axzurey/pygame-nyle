@@ -3,10 +3,11 @@ from __future__ import annotations
 import os
 import pathlib
 import time
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, TypedDict, Union
 import pygame
 import pygame.freetype
 from classes.color4 import color4
+from classes.nominal import clickable, hoverable
 from classes.sharedUtil import rawSet
 from gui.instance import instance
 
@@ -14,6 +15,22 @@ pygame.init()
 pygame.freetype.init()
 
 freeColorTuple = Tuple[int, int, int, Optional[int]]
+
+class actionPassList(TypedDict):
+    mouseLifted: bool
+    mousePressed: bool
+    mouseScrolling: bool
+    mouseScrollDirection: pygame.Vector2
+    keysDown: list[str]
+    keysUp: list[str]
+
+class actionOrder(TypedDict):
+    at: float
+    obj: instance
+
+class actionOrders(TypedDict):
+    hover: list[actionOrder]
+    click: list[actionOrder]
 
 class freeFont:
 
@@ -62,7 +79,7 @@ class renderer:
                 inst.parent.children.remove(inst);
                 rawSet(inst, 'parent', None);
 
-    def recurseUpdate(self, inst: instance, dt: float):
+    def recurseUpdate(self, inst: instance, dt: float, actionOrders: actionOrders, actionList: actionPassList):
         inst.update(dt)
 
         childrenPriority: list[instance] = []
@@ -76,11 +93,21 @@ class renderer:
 
         childrenPriority.sort(key=lambda x: x["zindex"])
 
-        print(inst, len(childrenPriority), len(childrenLast), inst.children)
+        for child in childrenPriority:
+            if issubclass(type(child), clickable):
+                actionOrders['click'].append({"obj": child, "at": time.time()})
+            if issubclass(type(child), hoverable):
+                actionOrders['hover'].append({"obj": child, "at": time.time()})
+            self.recurseUpdate(child, dt, actionOrders, actionList)
 
-        for child in childrenPriority: self.recurseUpdate(child, dt)
+        for child in childrenLast:
+            if issubclass(type(child), clickable):
+                actionOrders['click'].append({"obj": child, "at": time.time()})
+            if issubclass(type(child), hoverable):
+                actionOrders['hover'].append({"obj": child, "at": time.time()})
+            self.recurseUpdate(child, dt, actionOrders, actionList)
 
-        for child in childrenLast: self.recurseUpdate(child, dt)
+        return actionOrders
 
 
     def start(self):
@@ -97,14 +124,36 @@ class renderer:
             events = pygame.event.get()
             self.lastEvents = events;
 
+            passList: actionPassList = {
+                "mouseLifted": False,
+                "mousePressed": False,
+                "mouseScrolling": False,
+                "mouseScrollDirection": pygame.Vector2(),
+                "keysUp": [],
+                "keysDown": []
+            }
+
             for event in events:
                 if event.type == pygame.QUIT:
                     self.rendererClosing = True;
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    passList['mousePressed'] = True;
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    passList['mouseLifted'] = True
+                elif event.type == pygame.MOUSEWHEEL:
+                    passList['mouseScrolling'] = True
+                    passList["mouseScrollDirection"] = pygame.Vector2(event.x, event.y)
+                elif event.type == pygame.KEYDOWN:
+                    
+                
 
             self.screen.fill(self.backgroundColor.toRGBTuple())
 
             for child in self.children:
-                self.recurseUpdate(child, dt)
+                actionOrders = self.recurseUpdate(child, dt, {
+                    'hover': [],
+                    'click': []
+                }, passList)
 
             pygame.display.flip()
 

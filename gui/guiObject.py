@@ -1,5 +1,6 @@
 from typing import Literal, Union
 from classes.color4 import color4
+from classes.nominal import hoverable
 from classes.sharedUtil import create_neon
 from client.renderer import gameLoop
 from gui.guiDefaultProperties import LoadDefaultGuiProperties
@@ -9,7 +10,7 @@ from pygame import Vector2
 import pygame
 import classes.mathf as mathf
 
-class guiObject(instance):
+class guiObject(instance, hoverable):
     position: udim2
     size: udim2
 

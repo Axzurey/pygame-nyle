@@ -1,7 +1,8 @@
+from classes.nominal import clickable
 from gui.guiDefaultProperties import LoadDefaultGuiProperties
 from gui.textObject import textObject
 
-class textButton(textObject):
+class textButton(textObject, clickable):
 
     enabled: bool
     
