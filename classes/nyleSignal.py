@@ -1,3 +1,4 @@
+from typing import Generic, TypeVar
 import uuid
 
 from classes.sharedUtil import createThread
@@ -14,7 +15,9 @@ class connection:
     def disconnect(self):
         self.connected = False
 
-class phxSignal:
+A = TypeVar('A')
+
+class NyleSignal(Generic[A]):
 
     def __init__(self):
         self.connections: list[connection] = []
@@ -25,10 +28,10 @@ class phxSignal:
         self.connections.append(conn)
         return conn
 
-    def emit(self):
+    def emit(self, *params: A):
         for conn in self.connections:
             if self.mid != conn.idowner: continue
             if conn.connected:
-                createThread(conn.callback)
+                createThread(conn.callback, *params)
             else:
                 self.connections.remove(conn)

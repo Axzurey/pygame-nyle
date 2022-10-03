@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import pathlib
+from classes.nyleSignal import NyleSignal
 import time
 from typing import Dict, Optional, Tuple, TypedDict, Union
 import pygame
@@ -10,19 +11,22 @@ from classes.color4 import color4
 from classes.nominal import clickable, hoverable
 from classes.sharedUtil import rawSet
 from gui.instance import instance
+from modules.pyKeyMap import keyBuffer, purifyRawKeyBuffer
 
 pygame.init()
 pygame.freetype.init()
 
 freeColorTuple = Tuple[int, int, int, Optional[int]]
 
+class rendererListeners(TypedDict):
+    keyUp: NyleSignal[keyBuffer]
+    keyDown: NyleSignal[keyBuffer]
+
 class actionPassList(TypedDict):
     mouseLifted: bool
     mousePressed: bool
     mouseScrolling: bool
     mouseScrollDirection: pygame.Vector2
-    keysDown: list[str]
-    keysUp: list[str]
 
 class actionOrder(TypedDict):
     at: float
@@ -44,6 +48,8 @@ class renderer:
     lastUpdate: float
     lastEvents: list[pygame.event.Event]
 
+    listeners: rendererListeners
+
     children: list[instance]
 
     fonts: Dict[str, freeFont]
@@ -54,6 +60,11 @@ class renderer:
         self.lastEvents = []
         self.children = []
         self.fonts = {}
+
+        self.listeners = {
+            "keyUp": NyleSignal[keyBuffer](),
+            "keyDown": NyleSignal[keyBuffer]()
+        }
 
 
         self.backgroundColor = backgroundColor;
@@ -129,9 +140,11 @@ class renderer:
                 "mousePressed": False,
                 "mouseScrolling": False,
                 "mouseScrollDirection": pygame.Vector2(),
-                "keysUp": [],
-                "keysDown": []
             }
+
+            keysUp: list[int] = []
+            keysDown: list[int] = []
+            modifiers: list[int] = []
 
             for event in events:
                 if event.type == pygame.QUIT:
@@ -144,8 +157,26 @@ class renderer:
                     passList['mouseScrolling'] = True
                     passList["mouseScrollDirection"] = pygame.Vector2(event.x, event.y)
                 elif event.type == pygame.KEYDOWN:
-                    
-                
+                    keysDown.append(event.key)
+                    if not event.mod in modifiers:
+                        modifiers.append(event.mod)
+                elif event.type == pygame.KEYUP:
+                    keysUp.append(event.key)
+                    if not event.mod in modifiers:
+                        modifiers.append(event.mod)
+
+            upKeyBuffer = purifyRawKeyBuffer({
+                "keys": keysUp,
+                "modifiers": modifiers
+            })
+            
+            downKeyBuffer = purifyRawKeyBuffer({
+                "keys": keysDown,
+                "modifiers": modifiers
+            })
+
+            self.listeners["keyDown"].emit(downKeyBuffer)
+            self.listeners['keyUp'].emit(upKeyBuffer)
 
             self.screen.fill(self.backgroundColor.toRGBTuple())
 

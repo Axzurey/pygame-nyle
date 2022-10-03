@@ -1,0 +1,2 @@
+make a way for nylesignal to take separate params
+sorta like roblox's instance:GetPropertyChangedSignal("prop"):Connect(...)
