@@ -4,7 +4,7 @@ import os
 import pathlib
 from classes.nyleSignal import NyleSignal
 import time
-from typing import Dict, Optional, Tuple, TypedDict, Union
+from typing import Dict, Literal, Optional, Tuple, TypedDict, Union
 import pygame
 import pygame.freetype
 from classes.color4 import color4
@@ -32,9 +32,20 @@ class actionOrder(TypedDict):
     at: float
     obj: instance
 
-class actionOrders(TypedDict):
+class actionOrdersT(TypedDict):
     hover: list[actionOrder]
     click: list[actionOrder]
+
+class mouseClickBuffer(TypedDict):
+    x: int
+    y: int
+    clickType: Literal['right'] | Literal['left'] | Literal['middle']
+
+class updateBuffer(TypedDict):
+    mouseBuffer: mouseClickBuffer
+    actionOrders: actionOrdersT
+    actionList: actionPassList
+    lastButton: actionOrder | None
 
 class freeFont:
 
@@ -77,20 +88,7 @@ class renderer:
 
         self.loadDefaultFonts()
 
-    @staticmethod
-    def setParent(inst: instance, to: Union[renderer, instance, None]):
-        print(inst, to)
-        if to:
-            if inst in to.children: return;
-            rawSet(inst, 'parent', to);
-            to.children.append(inst);
-            print(id(to.children), id(inst.children))
-        else:
-            if inst.parent:
-                inst.parent.children.remove(inst);
-                rawSet(inst, 'parent', None);
-
-    def recurseUpdate(self, inst: instance, dt: float, actionOrders: actionOrders, actionList: actionPassList):
+    def recurseUpdate(self, inst: instance, dt: float, update: updateBuffer):
         inst.update(dt)
 
         childrenPriority: list[instance] = []
@@ -106,19 +104,22 @@ class renderer:
 
         for child in childrenPriority:
             if issubclass(type(child), clickable):
-                actionOrders['click'].append({"obj": child, "at": time.time()})
+                update['actionOrders']['click'].append({"obj": child, "at": time.time()})
+                t = time.time()
+                if child['absolutePosition'] and child['absoluteSize']:
+
             if issubclass(type(child), hoverable):
-                actionOrders['hover'].append({"obj": child, "at": time.time()})
-            self.recurseUpdate(child, dt, actionOrders, actionList)
+                update['actionOrders']['hover'].append({"obj": child, "at": time.time()})
+            return self.recurseUpdate(child, dt, update)
 
         for child in childrenLast:
             if issubclass(type(child), clickable):
-                actionOrders['click'].append({"obj": child, "at": time.time()})
+                update['actionOrders']['click'].append({"obj": child, "at": time.time()})
             if issubclass(type(child), hoverable):
-                actionOrders['hover'].append({"obj": child, "at": time.time()})
-            self.recurseUpdate(child, dt, actionOrders, actionList)
+                update['actionOrders']['hover'].append({"obj": child, "at": time.time()})
+            return self.recurseUpdate(child, dt, update)
 
-        return actionOrders
+        return (update['actionOrders'])
 
 
     def start(self):
@@ -180,11 +181,22 @@ class renderer:
 
             self.screen.fill(self.backgroundColor.toRGBTuple())
 
+            mouseBuffer: mouseClickBuffer = {
+                'x': 0,
+                'y': 0,
+                'clickType': 'left'
+            }
+
             for child in self.children:
-                actionOrders = self.recurseUpdate(child, dt, {
-                    'hover': [],
-                    'click': []
-                }, passList)
+                (actionOrders, clickTarget) = self.recurseUpdate(child, dt, {
+                    "actionOrders": {
+                        'hover': [],
+                        'click': []
+                    },
+                    "actionList": passList,
+                    "mouseBuffer": mouseBuffer,
+                    "lastButton": None
+                })
 
             pygame.display.flip()
 
@@ -212,6 +224,19 @@ class renderer:
                 self.loadFont(os.path.basename(p.split('.')[0]), os.path.join(searchDir, p))
         else:
             print(f'[nyle]: Unable to load default fonts from {searchDir} as it is not a folder')
+
+    @staticmethod
+    def setParent(inst: instance, to: Union[renderer, instance, None]):
+        print(inst, to)
+        if to:
+            if inst in to.children: return;
+            rawSet(inst, 'parent', to);
+            to.children.append(inst);
+            print(id(to.children), id(inst.children))
+        else:
+            if inst.parent:
+                inst.parent.children.remove(inst);
+                rawSet(inst, 'parent', None);
 
 
 class __gameLoop:
