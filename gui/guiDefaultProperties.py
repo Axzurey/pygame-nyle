@@ -30,7 +30,8 @@ GUI_DEFAULT_PROPERTIES = {
     "textAlignX": lambda: "left",
     "textAlignY": lambda: "top",
     "enabled": lambda: True,
-    "zindex": lambda: 1
+    "zindex": lambda: 1,
+    "boundingRect": lambda: pygame.Rect(0, 0, 0, 0)
 }
 
 GUI_PROPERTY_MAP: dict[str, Dict[Union[Literal['properties'], Literal["inherits"]], list[str]]] = {
@@ -42,7 +43,7 @@ GUI_PROPERTY_MAP: dict[str, Dict[Union[Literal['properties'], Literal["inherits"
             "size", "position", "backgroundColor",
             "borderColor", "borderWidth", "dropShadowColor", 
             "dropShadowRadius", "dropShadowOffset", "absolutePosition",
-            "absoluteSize", "cornerRadius", "zindex"
+            "absoluteSize", "cornerRadius", "zindex", "boundingRect"
         ],
         "inherits": ["instance"]
     },

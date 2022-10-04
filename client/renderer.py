@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import pathlib
+from turtle import position
 from classes.nyleSignal import NyleSignal
 import time
 from typing import Dict, Literal, Optional, Tuple, TypedDict, Union
@@ -37,12 +38,12 @@ class actionOrdersT(TypedDict):
     click: list[actionOrder]
 
 class mouseClickBuffer(TypedDict):
-    x: int
-    y: int
+    position: pygame.Vector2
     clickType: Literal['right'] | Literal['left'] | Literal['middle']
+    
 
 class updateBuffer(TypedDict):
-    mouseBuffer: mouseClickBuffer
+    mouseBuffer: mouseClickBuffer | None
     actionOrders: actionOrdersT
     actionList: actionPassList
     lastButton: actionOrder | None
@@ -88,7 +89,7 @@ class renderer:
 
         self.loadDefaultFonts()
 
-    def recurseUpdate(self, inst: instance, dt: float, update: updateBuffer):
+    def recurseUpdate(self, inst: instance, dt: float, update: updateBuffer) -> updateBuffer:
         inst.update(dt)
 
         childrenPriority: list[instance] = []
@@ -105,21 +106,34 @@ class renderer:
         for child in childrenPriority:
             if issubclass(type(child), clickable):
                 update['actionOrders']['click'].append({"obj": child, "at": time.time()})
-                t = time.time()
-                if child['absolutePosition'] and child['absoluteSize']:
+
+                if update['mouseBuffer']:
+
+                    t = time.time()
+                    if child.isPointInBounding(update['mouseBuffer']['position']):
+                        update['lastButton'] = {'at': t, 'obj': child}
 
             if issubclass(type(child), hoverable):
                 update['actionOrders']['hover'].append({"obj": child, "at": time.time()})
-            return self.recurseUpdate(child, dt, update)
+
+            update = self.recurseUpdate(child, dt, update)
 
         for child in childrenLast:
             if issubclass(type(child), clickable):
                 update['actionOrders']['click'].append({"obj": child, "at": time.time()})
+
+                if update['mouseBuffer']:
+
+                    t = time.time()
+                    if child.isPointInBounding(update['mouseBuffer']['position']):
+                        update['lastButton'] = {'at': t, 'obj': child}
+
             if issubclass(type(child), hoverable):
                 update['actionOrders']['hover'].append({"obj": child, "at": time.time()})
-            return self.recurseUpdate(child, dt, update)
 
-        return (update['actionOrders'])
+            update = self.recurseUpdate(child, dt, update)
+
+        return update
 
 
     def start(self):
@@ -147,11 +161,17 @@ class renderer:
             keysDown: list[int] = []
             modifiers: list[int] = []
 
+            mouseBuffer: mouseClickBuffer | None = None
+
             for event in events:
                 if event.type == pygame.QUIT:
                     self.rendererClosing = True;
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     passList['mousePressed'] = True;
+                    mouseBuffer = {
+                        'position': pygame.Vector2(event.pos),
+                        'clickType': 'left'
+                    }
                 elif event.type == pygame.MOUSEBUTTONUP:
                     passList['mouseLifted'] = True
                 elif event.type == pygame.MOUSEWHEEL:
@@ -181,14 +201,8 @@ class renderer:
 
             self.screen.fill(self.backgroundColor.toRGBTuple())
 
-            mouseBuffer: mouseClickBuffer = {
-                'x': 0,
-                'y': 0,
-                'clickType': 'left'
-            }
-
             for child in self.children:
-                (actionOrders, clickTarget) = self.recurseUpdate(child, dt, {
+                updBfr = self.recurseUpdate(child, dt, {
                     "actionOrders": {
                         'hover': [],
                         'click': []
@@ -197,6 +211,8 @@ class renderer:
                     "mouseBuffer": mouseBuffer,
                     "lastButton": None
                 })
+
+                there you go. it works, so now implement it c:
 
             pygame.display.flip()
 

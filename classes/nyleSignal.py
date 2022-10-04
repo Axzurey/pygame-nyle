@@ -1,13 +1,13 @@
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, Callable
 import uuid
 
 from classes.sharedUtil import createThread
 
 class connection:
-    callback: function;
+    callback: Callable;
     idowner: str;
     connected: bool
-    def __init__(self, idowner: str, callback: function):
+    def __init__(self, idowner: str, callback: Callable):
         self.callback = callback
         self.idowner = idowner
         self.connected = True
@@ -23,7 +23,7 @@ class NyleSignal(Generic[A]):
         self.connections: list[connection] = []
         self.mid = str(uuid.uuid4())
 
-    def connect(self, callback: function):
+    def connect(self, callback: Callable):
         conn = connection(self.mid, callback)
         self.connections.append(conn)
         return conn

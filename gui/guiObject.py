@@ -16,6 +16,8 @@ class guiObject(instance, hoverable):
 
     absolutePosition: pygame.Vector2
     absoluteSize: pygame.Vector2
+
+    boundingRect: pygame.Rect
     
     rotation: float
 
@@ -139,5 +141,7 @@ class guiObject(instance, hoverable):
         #screen.blit(backSurf, backgroundRect)
 
         screen.blit(realSurf, (0, 0), special_flags = pygame.BLEND_PREMULTIPLIED)
+
+        self.boundingRect = backgroundRect
 
         super().update(dt)
