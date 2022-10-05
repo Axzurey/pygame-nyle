@@ -26,21 +26,17 @@ class clickable:
             D4 = (x1 - x4) * (yp - y4) - (xp - x4) * (y1 - y4)
 
             if D1 > 0 and D2 > 0 and D3 > 0 and D4 > 0:
-                return True
+                sq1c1 = pos + size - Vector2(r, r)
+                sq1c2 = pos + size
+
+                sq2c1 = pos
+                sq2c2 = pos + Vector2(r, r)
+
+                sq3c1 = pos + Vector2(0, size.y)
+                sq3c2 = pos + Vector2(0, size.y) + Vector2(r, -r)
+
+                sq4c1 = pos + Vector2(size.x, 0)
+                sq4c2 = pos + Vector2(size.x, 0) + Vector2(-r, r)
+                
             else:
                 return False
-                """
-
-            sq1c1 = pos + size - Vector2(r, r)
-            sq1c2 = pos + size
-
-            sq2c1 = pos
-            sq2c2 = pos + Vector2(r, r)
-
-            sq3c1 = pos + Vector2(0, size.y)
-            sq3c2 = pos + Vector2(0, size.y) + Vector2(r, -r)
-
-            sq4c1 = pos + Vector2(size.x, 0)
-            sq4c2 = pos + Vector2(size.x, 0) + Vector2(-r, r)
-
-            if point  """

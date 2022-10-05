@@ -212,7 +212,9 @@ class renderer:
                     "lastButton": None
                 })
 
-                there you go. it works, so now implement it c:
+                # there you go. it works, so now implement it c:
+                if (updBfr['lastButton']):
+                    print(updBfr['lastButton']['obj'], 'clicked!')
 
             pygame.display.flip()
 

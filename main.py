@@ -33,8 +33,8 @@ btn1.textAlignY = 'center'
 btn1.textSize = 40
 btn1.parent = frame
 btn1.position = udim2(0, .4, 0, .4)
-btn1.size = udim2.fromOffset(50, 50)
-btn1.cornerRadius = 45
+btn1.size = udim2.fromOffset(400, 400)
+btn1.cornerRadius = 720
 
 btn2 = textButton()
 btn2.text = 'Y'
