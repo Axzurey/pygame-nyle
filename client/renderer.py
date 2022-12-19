@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import pathlib
-from turtle import position
 from classes.nyleSignal import NyleSignal
 import time
 from typing import Dict, Literal, Optional, Tuple, TypedDict, Union
